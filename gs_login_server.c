@@ -298,19 +298,19 @@ int main(int argc, char *argv[]) {
 
     if(port == 29900) {
         if (version5) {
-            sprintf (query_txt,"select * from information_schema.tables where table_name = 'gamespy_players' and table_schema='%s' limit 0,1",dbname);
+            sprintf (query_txt,"select * from information_schema.tables where table_name = 'player' and table_schema='%s' limit 0,1",dbname);
         } else {
-            sprintf (query_txt,"SHOW TABLES LIKE 'gamespy_players' ");
+            sprintf (query_txt,"SHOW TABLES LIKE 'player' ");
         }
 
         if (!mysql_exec_query (query_txt)) {
-            LogMessage("Table 'gamespy_players' not found. Create table...");
-            mysql_exec_query("CREATE TABLE gamespy_players (id int(8) unsigned NOT NULL, email varchar(255) NOT NULL, "
+            LogMessage("Table 'player' not found. Create table...");
+            mysql_exec_query("CREATE TABLE player (id int(8) unsigned NOT NULL, email varchar(255) NOT NULL, "
                        "password varchar(255) NOT NULL, passwordenc varchar(255) NOT NULL, nick varchar(255) NOT NULL, "
                        "PRIMARY KEY USING BTREE (id) )");
-            sprintf (query_txt,"INSERT INTO gamespy_players (id, email, password, passwordenc, nick) VALUES (%d, '' '','' '', '' '', '' '')",spid);
+            sprintf (query_txt,"INSERT INTO player (id, email, password, passwordenc, nick) VALUES (%d, '' '','' '', '' '', '' '')",spid);
             mysql_exec_query(query_txt);
-            LogMessage("Table 'gamespy_players' created successfuly");
+            LogMessage("Table 'player' created successfuly");
         }
 /*
         if (version5) {
@@ -599,7 +599,7 @@ quick_thread(client, int sd) {
             sprintf(temp,"INSERT INTO gamespy_pass (passwordenc, password) VALUES ('%s', '%s')",pass, password);
             mysql_exec_query(temp);
  */
-            sprintf(temp,"SELECT id, nick FROM gamespy_players WHERE email='%s' AND passwordenc='%s' ",escape_str(email, esc1),passenc);
+            sprintf(temp,"SELECT id, nick FROM player WHERE email='%s' AND passwordenc='%s' ",escape_str(email, esc1),passenc);
             if (!mysql_exec_query(temp)) {
                 vtype = 18;
             } else {
@@ -611,7 +611,7 @@ quick_thread(client, int sd) {
 
         //login
         if (vtype == 2) {
-            sprintf (temp,"SELECT id, email, password, nick FROM gamespy_players WHERE nick='%s' ",escape_str(uniquenick, esc1) );
+            sprintf (temp,"SELECT id, email, password, nick FROM player WHERE nick='%s' ",escape_str(uniquenick, esc1) );
             if (!mysql_exec_query(temp)) {
                 //nick not finded in DB
                 error_code = 260;
@@ -641,7 +641,7 @@ quick_thread(client, int sd) {
                 mystrcpy(error_msg, "Password is invalid. Certain characters are not accepted in password. Please enter another password.", sizeof(error_msg));
                 vtype = 17;
         } else {
-            sprintf (temp,"SELECT count(*) as kol FROM gamespy_players WHERE nick='%s' ",escape_str(uniquenick, esc1) );
+            sprintf (temp,"SELECT count(*) as kol FROM player WHERE nick='%s' ",escape_str(uniquenick, esc1) );
             mysql_exec_query(temp);
             if (atoi(mysql_field_value (0))>0) {
                 //nick exist
@@ -649,7 +649,7 @@ quick_thread(client, int sd) {
                 mystrcpy(error_msg, "The uniquenick is already in use.", sizeof(error_msg));
                 vtype = 17;
             } else {
-                sprintf (temp,"SELECT count(*) as kol FROM gamespy_players WHERE email='%s' ",escape_str (email, esc1) );
+                sprintf (temp,"SELECT count(*) as kol FROM player WHERE email='%s' ",escape_str (email, esc1) );
                 mysql_exec_query(temp);
                 if (atoi(mysql_field_value (0))>0) {
                     //email exist
@@ -658,17 +658,17 @@ quick_thread(client, int sd) {
                     vtype = 17;
                 } else {
                     //insert new nick in DB
-                    sprintf (temp,"select max(id) as max_id from gamespy_players");
+                    sprintf (temp,"select max(id) as max_id from player");
                     mysql_exec_query(temp);
                     max_id = atoi (mysql_field_value (0));
                     max_id++;
 
-                    sprintf (temp,"INSERT INTO gamespy_players (id, email, password, passwordenc, nick) "
+                    sprintf (temp,"INSERT INTO player (id, email, password, passwordenc, nick) "
                                   "VALUES (%d, '%s', '%s', '%s', '%s')",
                                   max_id, escape_str (email, esc1), escape_str (password, esc2), passenc, escape_str (uniquenick, esc3) );
 //                                  max_id, email, password, passenc, uniquenick);
                     mysql_exec_query(temp);
-                    sprintf (temp,"SELECT id from gamespy_players WHERE nick='%s' AND passwordenc='%s' ",escape_str (uniquenick, esc1), passenc);
+                    sprintf (temp,"SELECT id from player WHERE nick='%s' AND passwordenc='%s' ",escape_str (uniquenick, esc1), passenc);
                     mysql_exec_query(temp);
                     mycrc = atoi (mysql_field_value (0));
                 }
@@ -678,7 +678,7 @@ quick_thread(client, int sd) {
 
         //check
         if (vtype == 13) {
-            sprintf (temp,"SELECT id from gamespy_players WHERE nick='%s' AND email='%s' AND password='%s' ",escape_str(nick, esc1), escape_str(email, esc2), escape_str(password, esc3));
+            sprintf (temp,"SELECT id from player WHERE nick='%s' AND email='%s' AND password='%s' ",escape_str(nick, esc1), escape_str(email, esc2), escape_str(password, esc3));
             mysql_exec_query(temp);
             mycrc = atoi (mysql_field_value (0));
         }
