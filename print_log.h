@@ -5,7 +5,7 @@ int              log_on        = 0;
 void LogMessage (char * txt) {
     /* write log file */
         int MAXLOGSIZE = 512000;
-        char LogPath[256] = ".\\logs\\";
+        char LogPath[256] = "/opt/gsloginemu/logs/";
         FILE *file;
         char file_name[256],
              new_file_name[256],
